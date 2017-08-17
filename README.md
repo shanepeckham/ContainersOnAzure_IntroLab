@@ -83,10 +83,10 @@ docker pull shanepeckham/go_order_sb
 We will now test the image locally to ensure that it is working and connecting to our CosmosDB and Application Insights instances. The keys you copied for the DB and App Insights keys are set as environment variables within the container, so we will need to ensure we populate these.
 
 The environment keys that need to be set are as follows:
-DATABASE: <your cosmodb username from step 1>
-PASSWORD: <your cosmodb password from step 1>
-INSIGHTSKEY: <you app insights key from step 2>
-SOURCE: This is a free text field which we will use specify where we are running the container from. I use the values localhost, AppService, ACI and K8 for my tests
+* DATABASE: <your cosmodb username from step 1>
+* PASSWORD: <your cosmodb password from step 1>
+* INSIGHTSKEY: <you app insights key from step 2>
+* SOURCE: This is a free text field which we will use specify where we are running the container from. I use the values localhost, AppService, ACI and K8 for my tests
 
 So to run the container on your local machine, enter the following command, substituting your environment variable values:
 
@@ -170,11 +170,11 @@ az webapp config container set -n <your unique web app name> -g <yourresourcegro
 Now we need to go and set the environment variables for our container to ensure that we can connect to our Cosmos DB and Application Insights. Navigate to the *Application Settings* pane within the Azure portal for your Web App and add the following entries in the 'App Settings' section, namely:
 
 The environment keys that need to be set are as follows:
-DATABASE: <your cosmodb username from step 1>
-PASSWORD: <your cosmodb password from step 1>
-INSIGHTSKEY: <you app insights key from step 2>
-SOURCE: This is a free text field which we will use specify where we are running the container from. I use the values localhost, AppService, ACI and K8 for my tests
-PORT: 8080 
+* DATABASE: <your cosmodb username from step 1>
+* PASSWORD: <your cosmodb password from step 1>
+* INSIGHTSKEY: <you app insights key from step 2>
+* SOURCE: This is a free text field which we will use specify where we are running the container from. I use the values localhost, AppService, ACI and K8 for my tests
+* PORT: 8080 
 
 See below:
 ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/appsettings.png)
