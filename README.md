@@ -19,8 +19,10 @@ This intro lab serves to guide you on a few ways you can deploy a container on A
 
 For this Lab you will require:
 
-* Install Postman, get it here - https://www.getpostman.com - this is optional but useful
+* Install the Azure CLI 2.0, get it here - https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 * Install Docker, get it here - https://docs.docker.com/engine/installation/
+* Install Postman, get it here - https://www.getpostman.com - this is optional but useful
+
 
 ## 1. Provisioning a Cosmos DB instance
 
@@ -56,7 +58,7 @@ Once Application Insights is provisioned, we need to get the Instrumentation key
 
 ## 3. Provisioning an Azure Container Registry instance
 
-If you would like an example of how to setup an Azure Container Registry instance via ARM, have a look [here](https://github.com/shanepeckham/CADScenario_Recommendations)
+If you would like an example of how to setup an [Azure Container Registry](https://azure.microsoft.com/en-us/services/container-registry/) instance via ARM, have a look [here](https://github.com/shanepeckham/CADScenario_Recommendations)
 
 Navigate to the Azure Portal and select create new Azure Container Registry, enter the following parameters:
 
@@ -111,12 +113,69 @@ See below:
 
 ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/CosmosQuery.png)
 
+## 5. Retag the image and upload it your private Azure Container Registry
 
+Navigate to the Azure Container Registry instance you provisioned within the Azure portal. Click on the *Quick Start* blade, this will provide you with the relevant commands to upload a container image to your registry, see below:
 
+![alt text](https://github.com/shanepeckham/CADScenario_Recommendations/blob/master/images/quicksstartacs.png)
 
+Now we will push the image up to the Azure Container Registry, enter the following (from the quickstart screen):
 
+``` 
+docker login <yourcontainerregistryinstance>.azurecr.io
 
+```
 
+To get the username and password, navigate to the *Access Keys* blade, see below:
 
+![alt text](https://github.com/shanepeckham/CADScenario_Recommendations/blob/master/images/acskeys.png)
 
+You will receive a 'Login Succeeded' message. Now type the following:
+```
+docker tag shanepeckham/go_order_sb <yourcontainerregistryinstance>.azurecr.io/go_order_sb
+docker push <yourcontainerregistryinstance>.azurecr.io/go_order_sb
+```
+Once this has completed, you will be able to see your container uploaded to the Container Registry within the portal, see below:
+
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/registryrepo.png)
+
+## 6. Deploy the container to App Services
+
+We will now deploy the container to Azure App Services via the Azure CLI. If you would like an example of how to setup an [App Service Application](https://docs.microsoft.com/en-us/azure/app-service-web/app-service-linux-intro) instance via ARM and associate the container with your Azure Container Registry, have a look [here](https://github.com/shanepeckham/CADScenario_Recommendations)
+
+[Login to your Azure subscription via the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli) and enter the following first command to create your App service plan:
+
+```
+az appservice plan create -g <yourresourcegroup> -n <yourappserviceplan> --is-linux
+```
+
+Upon recieving the 'provisioningState': 'Succeeded' json response, enter the following to create your app which will run our API:
+
+```
+az webapp create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup>
+```
+
+Upon receiving the successul completion json response, we will now associate our container from our private Azure Registry to the App Service App, type the following:
+
+```
+az webapp config container set -n <your unique web app name> -g <yourresourcegroup>
+--docker-custom-image-name yourcontainerregistryinstance.azurecr.io/go_order_sb:latest
+--docker-registry-server-url https://<yourcontainerregistryinstance>.azurecr.io
+--docker-registry-server-user <your acr admin username>
+--docker-registry-server-password <your acr admin password>
+```
+
+### Associate the environment variables with API App
+
+Now we need to go and set the environment variables for our container to ensure that we can connect to our Cosmos DB and Application Insights. Navigate to the *Application Settings* pane within the Azure portal for your Web App and add the following entries in the 'App Settings' section, namely:
+
+The environment keys that need to be set are as follows:
+DATABASE: <your cosmodb username from step 1>
+PASSWORD: <your cosmodb password from step 1>
+INSIGHTSKEY: <you app insights key from step 2>
+SOURCE: This is a free text field which we will use specify where we are running the container from. I use the values localhost, AppService, ACI and K8 for my tests
+PORT: 8080 
+
+See below:
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/appsettings.png)
 
