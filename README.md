@@ -179,3 +179,58 @@ The environment keys that need to be set are as follows:
 See below:
 ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/appsettings.png)
 
+## 7. Deploy the container to Azure Container Instance
+
+Now we will deploy our container to [Azure Container Instances](https://azure.microsoft.com/en-us/services/container-instances/). 
+
+In the command terminal, login using the AZ CLI and we will start off by created a new resourcegroup for our Container instance. At the time of writing this functionality is still in preview and is thus not available in all regions (it is currently available in westeurope, eastus, westus), hence why we will create a new resourcegroup just in case. 
+
+Enter the following:
+
+```
+az group create --name <yourACIresourcegroup> --location westeurope
+```
+
+### Associate the environment variables with Azure Container Instance
+
+We will now deploy our container instance via an ARM template, which is [here](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/azuredeploy.json) but before we do, we need to edit this document to ensure we set our environment variables.
+
+
+In the document, the following section needs to be amended, adding your environment keys like you did before:
+
+```
+
+"properties": {
+                "containers": [
+                    {
+                        "name": "[variables('container1name')]",
+                        "properties": {
+                            "image": "[variables('container1image')]",
+                            "environmentVariables": [
+                                {
+                                    "name": "DATABASE",
+                                    "value": "<your cosmodb username from step 1>"
+                                },
+                                {
+                                    "name": "PASSWORD",
+                                    "value": "<your cosmodb password from step 1>"
+                                },
+                                {
+                                    "name": "INSIGHTSKEY",
+                                    "value": "<you app insights key from step 2>"
+                                },
+                                {
+                                    "name": "SOURCE",
+                                    "value": "ACI"
+                                }
+                            ],
+
+```
+Once this document is saved, we can create the deployment via the az CLI. Enter the following:
+
+```
+az group deployment create --name <yourACIname> --resource-group <yourACIresourcegroup> --template-file /<path to your file>/azuredeploy.json
+```
+
+Once this has succeeded, you will see your external IP address within the response json, copy this value and navigate to http://<yourACIExternalIP>:8080/swagger and test your API like before.
+
