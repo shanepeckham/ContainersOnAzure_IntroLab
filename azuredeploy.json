@@ -21,15 +21,15 @@
                             "environmentVariables": [
                                 {
                                     "name": "DATABASE",
-                                    "value": "k8orders"
+                                    "value": ""
                                 },
                                 {
                                     "name": "PASSWORD",
-                                    "value": "=="
+                                    "value": ""
                                 },
                                 {
                                     "name": "INSIGHTSKEY",
-                                    "value": "7"
+                                    "value": ""
                                 },
                                 {
                                     "name": "SOURCE",

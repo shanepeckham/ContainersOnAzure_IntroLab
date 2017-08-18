@@ -26,17 +26,17 @@ spec:
     spec:
       containers:
       - name: goordersb
-        image: cadcontainerregistry.azurecr.io/go_order_sb
+        image: <yourcontainerregistry>.azurecr.io/go_order_sb
         env:
         - name: DATABASE
           value: ""
         - name: PASSWORD
           value: ""
         - name: INSIGHTSKEY
-          value: "7"
+          value: ""
         - name: SOURCE
           value: "K8"
         ports:
           - containerPort: 8080
       imagePullSecrets:
-        - name: cadcontainerregistry
+        - name: <yourcontainerregistry>
