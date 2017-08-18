@@ -322,7 +322,7 @@ You should get a success message that a deployment and service has been created.
 
 ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8service.png)
 
-You can now navigate to http://<k8serviceendpoint>:8080/swagger and test your API
+You can now navigate to http://k8serviceendpoint:8080/swagger and test your API
 
 ## 8. Deploy the container to an Azure Container Engine and manage it from within your Kubernetes cluster
 
@@ -357,10 +357,10 @@ $ az ad sp create-for-rbac --role=Contributor --scopes /subscriptions/<subscript
 
 Edit the [aci_connector_go_order_sb.yaml](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/aci_connector_go_order_sb.yaml) and input environment variables using the values above:
 
-AZURE_CLIENT_ID: insert appId
-AZURE_CLIENT_KEY: insert password
-AZURE_TENANT_ID: insert tenant
-AZURE_SUBSCRIPTION_ID: insert subscriptionId
+* AZURE_CLIENT_ID: insert appId
+* AZURE_CLIENT_KEY: insert password
+* AZURE_TENANT_ID: insert tenant
+* AZURE_SUBSCRIPTION_ID: insert subscriptionId
 
 ```
 $ kubectl create -f examples/aci-connector.yaml 
