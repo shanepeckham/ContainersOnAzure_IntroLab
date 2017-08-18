@@ -159,7 +159,7 @@ Upon receiving the successul completion json response, we will now associate our
 
 ```
 az webapp config container set -n <your unique web app name> -g <yourresourcegroup>
---docker-custom-image-name yourcontainerregistryinstance.azurecr.io/go_order_sb:latest
+--docker-custom-image-name <yourcontainerregistryinstance>.azurecr.io/go_order_sb:latest
 --docker-registry-server-url https://<yourcontainerregistryinstance>.azurecr.io
 --docker-registry-server-user <your acr admin username>
 --docker-registry-server-password <your acr admin password>
@@ -266,8 +266,150 @@ Note, it is always a good idea to apply an auto shutdown policy to your VMs to a
 
 ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/autoshutdown.png)
 
+### Register our Azure Container Registry within Kubernetes
+
+We now want to register our private Azure Container Registry with our Kubernetes cluster to ensure that we can pull images from it. Enter the following within your command window:
+
+```
+kubectl create secret docker-registry <yourcontainerregistryinstance> --docker-server=<yourcontainerregistryinstance>.azurecr.io --docker-username=<your acr admin username> --docker-password=<your acr admin password> --docker-email=shanepeckham@live.com
+```
+
+In the Kubernetes dashboard you should now see this created within the secrets section:
+
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8secrets.png)
+
 ### Associate the environment variables with container we want to deploy to Kubernetes
 
-We will now deploy our container via a yaml file, which is [here](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/go_order_sb.yaml) but before we do, we need to edit this file to ensure we set our environment variables.
+We will now deploy our container via a yaml file, which is [here](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/go_order_sb.yaml) but before we do, we need to edit this file to ensure we set our environment variables and ensure that you have set your private Azure Container Registry correctly:
 
+```
 
+spec:
+      containers:
+      - name: goordersb
+        image: <containerregistry>.azurecr.io/go_order_sb
+        env:
+        - name: DATABASE
+          value: "<your cosmodb username from step 1>""
+        - name: PASSWORD
+          value: "<your cosmodb password from step 1>""
+        - name: INSIGHTSKEY
+          value: ""<you app insights key from step 2>""
+        - name: SOURCE
+          value: "K8"
+        ports:
+        - containerPort: 8080
+      imagePullSecrets:
+        - name: <yourcontainerregistry>
+```
+
+Once the yaml file has been updated, we can now deploy our container. Within the command line enter the following:
+
+```
+kubectl create -f ./<your path>/go_order_sb.yaml
+```
+You should get a success message that a deployment and service has been created. Nvaigate back to the Kubernetes dashboard and you should see the following:
+
+#### Your deployments running 
+
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8deployments.png.png)
+
+#### Your three pods
+
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8pods.png.png)
+
+#### Your service and external endpoint
+
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8service.png)
+
+You can now navigate to http://<k8serviceendpoint>:8080/swagger and test your API
+
+## 8. Deploy the container to an Azure Container Engine and manage it from within your Kubernetes cluster
+
+Now we will deploy our container to Azure Container Instances and use the [ACI connector](https://github.com/azure/aci-connector-k8s) to manage it from within our Kubernetes cluster.
+
+### Create a Service Principle
+
+A service principal is required to allow the ACI Connector to create resources in your Azure subscription. You can create one using the az CLI using the instructions below.
+
+Find your ``` subscriptionId ``` with the az CLI:
+
+```
+$ az account list -o table
+Name                                             CloudName    SubscriptionId                        State    IsDefault
+-----------------------------------------------  -----------  ------------------------------------  -------  -----------
+Pay-As-You-Go                                    AzureCloud   12345678-9012-3456-7890-123456789012  Enabled  True
+```
+
+Use ``` az ``` to create a Service Principal that can perform operations on your resource group:
+```
+$ az ad sp create-for-rbac --role=Contributor --scopes /subscriptions/<subscriptionId>/resourceGroups/aci-test
+{
+  "appId": "<redacted>",
+  "displayName": "azure-cli-2017-07-19-19-13-19",
+  "name": "http://azure-cli-2017-07-19-19-13-19",
+  "password": "<redacted>",
+  "tenant": "<redacted>"
+}
+```
+
+#### Install the ACI Connector
+
+Edit the [aci_connector_go_order_sb.yaml](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/aci_connector_go_order_sb.yaml) and input environment variables using the values above:
+
+AZURE_CLIENT_ID: insert appId
+AZURE_CLIENT_KEY: insert password
+AZURE_TENANT_ID: insert tenant
+AZURE_SUBSCRIPTION_ID: insert subscriptionId
+
+```
+$ kubectl create -f examples/aci-connector.yaml 
+deployment "aci-connector" created
+
+$ kubectl get nodes -w
+NAME                        STATUS                     AGE       VERSION
+aci-connector               Ready                      3s        1.6.6
+k8s-agentpool1-31868821-0   Ready                      5d        v1.7.0
+k8s-agentpool1-31868821-1   Ready                      5d        v1.7.0
+k8s-agentpool1-31868821-2   Ready                      5d        v1.7.0
+k8s-master-31868821-0       Ready,SchedulingDisabled   5d        v1.7.0
+```
+
+You should now the see the ACI Connector running within your Kubernetes cluster, see below:
+
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8acsconnector.png)
+
+### Deploy the container to Azure Container Instance managed by Kubernetes and set environment variables
+
+We will now deploy our container via a yaml file again, which is [here](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/go_order_sb_aci_node.yaml) but before we do, we need to edit this file to ensure we set our environment variables.
+
+Now we want to add the environment variables and ensure that you have set your private Azure Container Registry correctly:
+```
+spec:
+  containers:
+  - name: goordersb
+    image: <yourcontainerregistry>.azurecr.io/go_order_sb
+    env:
+    - name: DATABASE
+      value: ""
+    - name: PASSWORD
+      value: ""
+    - name: INSIGHTSKEY
+      value: ""
+    - name: SOURCE
+      value: "K8ACI"
+    ports:
+      - containerPort: 8080
+  imagePullSecrets:
+    - name: <yourcontainerregistry>
+  dnsPolicy: ClusterFirst
+  nodeName: aci-connector
+  
+  ```
+  
+Once deployed you should now see your container instances running, one within your cluster, and one running on the ACI Connector pod, see below:
+  
+ ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8acipod.png)
+
+You can now test the API
+ 
