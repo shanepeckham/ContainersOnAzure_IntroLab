@@ -312,11 +312,11 @@ You should get a success message that a deployment and service has been created.
 
 #### Your deployments running 
 
-![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8deployments.png.png)
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8deployments.png)
 
 #### Your three pods
 
-![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8pods.png.png)
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8pods.png)
 
 #### Your service and external endpoint
 
