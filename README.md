@@ -276,7 +276,7 @@ kubectl create secret docker-registry <yourcontainerregistryinstance> --docker-s
 
 In the Kubernetes dashboard you should now see this created within the secrets section:
 
-![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8secrets.png)
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8secrets.png)
 
 ### Associate the environment variables with container we want to deploy to Kubernetes
 
@@ -312,15 +312,15 @@ You should get a success message that a deployment and service has been created.
 
 #### Your deployments running 
 
-![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8deployments.png.png)
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8deployments.png.png)
 
 #### Your three pods
 
-![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8pods.png.png)
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8pods.png.png)
 
 #### Your service and external endpoint
 
-![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8service.png)
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8service.png)
 
 You can now navigate to http://<k8serviceendpoint>:8080/swagger and test your API
 
@@ -377,7 +377,7 @@ k8s-master-31868821-0       Ready,SchedulingDisabled   5d        v1.7.0
 
 You should now the see the ACI Connector running within your Kubernetes cluster, see below:
 
-![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8acsconnector.png)
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8acsconnector.png)
 
 ### Deploy the container to Azure Container Instance managed by Kubernetes and set environment variables
 
@@ -409,7 +409,7 @@ spec:
   
 Once deployed you should now see your container instances running, one within your cluster, and one running on the ACI Connector pod, see below:
   
- ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8acipod.png)
+ ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8acipod.png)
 
 You can now test the API
  
