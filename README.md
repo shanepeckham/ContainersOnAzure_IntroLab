@@ -8,7 +8,7 @@ This intro lab serves to guide you on a few ways you can deploy a container on A
 *	Deploy a container on App Service PaaS platform
 *	Deploy a container on an Azure Container Instance (managed Kubernetes cluster)
 *	Deploy an unmanaged Kubernetes cluster on Azure using Azure Container Service and deploy our container onto it
-* Write to Azure Cosmos DB. [Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/) is Microsoft's globally distributed, multi-model database: 
+* Write to Azure Cosmos DB. [Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/) is Microsoft's globally distributed, multi-model database 
 * Use [Application Insights](https://azure.microsoft.com/en-us/services/application-insights/) to track custom events in the application
 
 # Technology used
@@ -232,5 +232,42 @@ Once this document is saved, we can create the deployment via the az CLI. Enter 
 az group deployment create --name <yourACIname> --resource-group <yourACIresourcegroup> --template-file /<path to your file>/azuredeploy.json
 ```
 
-Once this has succeeded, you will see your external IP address within the response json, copy this value and navigate to http://<yourACIExternalIP>:8080/swagger and test your API like before.
+Once this has succeeded, you will see your external IP address within the response json, copy this value and navigate to http://yourACIExternalIP:8080/swagger and test your API like before.
+
+## 8. Deploy the container to an Azure Container Engine provisioned Kubernetes cluster
+
+Here we will deploy a Kubernetes cluster quickly using the [Azure Container Engine](https://azure.microsoft.com/en-us/services/container-service/). Note, the approach below will control all aspects of your Kubernetes setup and is intended for quick provisioning, for more control on the implementation look at the following: 
+
+We will start by once again creating a resource group for our cluster using the az CLI and the acs engine, in a command window enter the following:
+
+```
+az group create --name <yourresourcegroupk8> --location <yourlocation>
+```
+
+Upon receiving your "provisioningState": "Succeeded" json response, enter the following:
+
+```
+az acs create --orchestrator-type kubernetes --resource-group <yourresourcegroupk8> --name <yourk8cluster> --generate-ssh-keys
+```
+
+You will now be able to connect to your cluster with the following command:
+
+```
+az acs kubernetes get-credentials --resource-group=<yourresourcegroupk8> --name=<yourk8cluster>
+```
+
+And to access your Kubernetes graphical dashboard enter:
+
+```
+az acs kubernetes browse -g <yourresourcegroupk8> -n <yourk8cluster> 
+```
+
+Note, it is always a good idea to apply an auto shutdown policy to your VMs to avoid unnecessary costs for a test cluster, you can do this in the portal by navigating to the VMs provisioned within your resource group <yourresourcegroupk8> and navigating to the Auto Shutdown section for each one, see below:
+
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/autoshutdown.png)
+
+### Associate the environment variables with container we want to deploy to Kubernetes
+
+We will now deploy our container via a yaml file, which is [here](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/go_order_sb.yaml) but before we do, we need to edit this file to ensure we set our environment variables.
+
 
