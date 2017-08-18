@@ -188,7 +188,7 @@ In the command terminal, login using the AZ CLI and we will start off by created
 Enter the following:
 
 ```
-az group create --name <yourACIresourcegroup> --location westeurope
+az group create --name <yourACIresourcegroup> --location <westeurope, eastus, westus>
 ```
 
 ### Associate the environment variables with Azure Container Instance
@@ -312,15 +312,15 @@ You should get a success message that a deployment and service has been created.
 
 #### Your deployments running 
 
-![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8deployments.png)
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8deployments.png)
 
 #### Your three pods
 
-![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8pods.png)
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8pods.png)
 
 #### Your service and external endpoint
 
-![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8service.png)
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8service.png)
 
 You can now navigate to http://<k8serviceendpoint>:8080/swagger and test your API
 
@@ -377,7 +377,7 @@ k8s-master-31868821-0       Ready,SchedulingDisabled   5d        v1.7.0
 
 You should now the see the ACI Connector running within your Kubernetes cluster, see below:
 
-![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8acsconnector.png)
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/k8acsconnector.png)
 
 ### Deploy the container to Azure Container Instance managed by Kubernetes and set environment variables
 
