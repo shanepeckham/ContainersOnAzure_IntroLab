@@ -29,10 +29,10 @@ For this Lab you will require:
 
 Let's start by creating a Cosmos DB instance in the portal, this is a quick process. Navigate to the Azure portal and create a new Azure Cosmos DB instance, enter the following parameters:
 
-ID: <yourdbinstance>
-API: Select MongoDB as the API as our container API will use this driver
-ResourceGroup: <yourresourcegroup>
-Location: <yourlocation>
+* ID: <yourdbinstance>
+* API: Select MongoDB as the API as our container API will use this driver
+* ResourceGroup: <yourresourcegroup>
+* Location: <yourlocation>
 
 See below:
 ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/CosmosDB.png)
@@ -45,10 +45,10 @@ Once the DB is provisioned, we need to get the Database Username and Password, t
 
 In the Azure portal, select create new Application Insights instance, enter the following parameters:
 
-Name: <yourappinsightsinstance>
-Application Type: General
-ResourceGroup: <yourresourcegroup>
-Location: <yourlocation>
+* Name: <yourappinsightsinstance>
+* Application Type: General
+* ResourceGroup: <yourresourcegroup>
+* Location: <yourlocation>
 
 See below:
 ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/ApplicationInsights.png)
@@ -63,12 +63,12 @@ If you would like an example of how to setup an [Azure Container Registry](https
 
 Navigate to the Azure Portal and select create new Azure Container Registry, enter the following parameters:
 
-Registry Name: <yourcontainerregistryinstance>
-ResourceGroup: <yourresourcegroup>
-Location: <yourlocation>
-Admin User: Enable
-SKU: Classic
-Storage Account: Select the default value provided
+* Registry Name: <yourcontainerregistryinstance>
+* ResourceGroup: <yourresourcegroup>
+* Location: <yourlocation>
+* Admin User: Enable
+* SKU: Classic
+* Storage Account: Select the default value provided
 
 See below:
 ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/ContainerRegistry.png)
@@ -96,13 +96,13 @@ sudo docker run --name go_order_sb -p 8080:8080 -e DATABASE="<your cosmodb usern
 ```
 Note, the application runs on port 8080 which we will bind to the host as well. If you are running on Windows, select 'Allow Access' on Windows Firewall.
 
-If all goes well, you should see something like the image below, with the application running on localhost:8080, see below:
+If all goes well, you should see the application running on localhost:8080, see below:
 ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/localrun.png)
 
 Now you can navigate to localhost:8080/swagger and test the api. Select the 'POST' /order/ section, select the button "Try it out" and enter some values in the json provided and select "Execute", see below:
 ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/swagger.png)
 
-If all goes well, you will get a CosmosDB Id returned for the order you have just placed, see below:
+If the request succeeded, you will get a CosmosDB Id returned for the order you have just placed, see below:
 ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/swaggerresponse.png)
 
 We can now go and query CosmosDB to check our entry there, in the Azure portal, navigate back to your Cosmos DB instance and go to the section Data Explorer (note, at the time of writing this is in preview so is subject to change). We can now query for the order we placed. A collection called 'orders' will have been created within your database, you can then apply a filter for the id we created, namely:
@@ -150,7 +150,7 @@ We will now deploy the container to Azure App Services via the Azure CLI. If you
 az appservice plan create -g <yourresourcegroup> -n <yourappserviceplan> --is-linux
 ```
 
-Upon recieving the 'provisioningState': 'Succeeded' json response, enter the following to create your app which will run our API:
+Upon receiving the 'provisioningState': 'Succeeded' json response, enter the following to create your app which will run our API:
 
 ```
 az webapp create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup>
@@ -309,7 +309,7 @@ Once the yaml file has been updated, we can now deploy our container. Within the
 ```
 kubectl create -f ./<your path>/go_order_sb.yaml
 ```
-You should get a success message that a deployment and service has been created. Nvaigate back to the Kubernetes dashboard and you should see the following:
+You should get a success message that a deployment and service has been created. Navigate back to the Kubernetes dashboard and you should see the following:
 
 #### Your deployments running 
 
