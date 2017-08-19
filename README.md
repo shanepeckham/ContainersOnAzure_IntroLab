@@ -237,7 +237,7 @@ Once this has succeeded, you will see your external IP address within the respon
 
 ## 8. Deploy the container to an Azure Container Engine provisioned Kubernetes cluster
 
-Here we will deploy a Kubernetes cluster quickly using the [Azure Container Engine](https://azure.microsoft.com/en-us/services/container-service/). Note, the approach below will control all aspects of your Kubernetes setup and is intended for quick provisioning, for more control on the implementation look at the following: 
+Here we will deploy a Kubernetes cluster quickly using the [Azure Container Engine](https://azure.microsoft.com/en-us/services/container-service/). Note, the approach below will control all aspects of your Kubernetes setup and is intended for quick provisioning, for more control on the implementation look at the [following](https://github.com/Azure/acs-engine/blob/master/docs/acsengine.md). 
 
 We will start by once again creating a resource group for our cluster using the az CLI and the acs engine, in a command window enter the following:
 
