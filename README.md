@@ -250,6 +250,11 @@ Upon receiving your "provisioningState": "Succeeded" json response, enter the fo
 ```
 az acs create --orchestrator-type kubernetes --resource-group <yourresourcegroupk8> --name <yourk8cluster> --generate-ssh-keys
 ```
+In case you have not already, install the kubernetes client:
+
+```
+az acs kubernetes install-cli
+```
 
 You will now be able to connect to your cluster with the following command:
 
