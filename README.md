@@ -24,6 +24,11 @@ For this Lab you will require:
 * Install Docker, get it here - https://docs.docker.com/engine/installation/
 * Install Postman, get it here - https://www.getpostman.com - this is optional but useful
 
+When using the Azure CLI, after logging in, if you have more than one subscripton you may need to set the default subscription you wish to perform actions against. To do this use the following command:
+
+```
+az account set --subscription "<your requried subscription guid>"
+```
 
 ## 1. Provisioning a Cosmos DB instance
 
@@ -89,7 +94,7 @@ The environment keys that need to be set are as follows:
 * INSIGHTSKEY: <you app insights key from step 2>
 * SOURCE: This is a free text field which we will use specify where we are running the container from. I use the values localhost, AppService, ACI and K8 for my tests
 
-So to run the container on your local machine, enter the following command, substituting your environment variable values:
+So to run the container on your local machine, enter the following command, substituting your environment variable values (if you are running Docker on Windows, omit the 'sudo'):
 
 ```
 sudo docker run --name go_order_sb -p 8080:8080 -e DATABASE="<your cosmodb username from step 1>" -e PASSWORD="<your cosmodb password from step 1>" -e INSIGHTSKEY="<you app insights key from step 2>" -e SOURCE="localhost"  --rm -i -t shanepeckham/go_order_sb
@@ -156,7 +161,11 @@ Upon receiving the 'provisioningState': 'Succeeded' json response, enter the fol
 az webapp create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup>
 ```
 
-Upon receiving the successul completion json response, we will now associate our container from our private Azure Registry to the App Service App, type the following:
+If you are using the lastest Azure CLI version, you may need to use the following alternative syntax:
+
+```az appservice web create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup>```
+
+Upon receiving the successul completion json response, we will now associate our container from our private Azure Registry to the App Service App, type the following (if you are using PowerShell on Windows, you may need to remove any line breaks and continue on a single line):
 
 ```
 az webapp config container set -n <your unique web app name> -g <yourresourcegroup>
