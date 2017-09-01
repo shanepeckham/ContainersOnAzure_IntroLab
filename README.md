@@ -358,7 +358,7 @@ Pay-As-You-Go                                    AzureCloud   12345678-9012-3456
 
 Use ``` az ``` to create a Service Principal that can perform operations on your resource group:
 ```
-$ az ad sp create-for-rbac --role=Contributor --scopes /subscriptions/<subscriptionId>/resourceGroups/aci-test
+$ az ad sp create-for-rbac --role=Contributor --scopes /subscriptions/<subscriptionId>/resourceGroups/<yourresourcegroupk8>
 {
   "appId": "<redacted>",
   "displayName": "azure-cli-2017-07-19-19-13-19",
