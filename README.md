@@ -158,10 +158,10 @@ az appservice plan create -g <yourresourcegroup> -n <yourappserviceplan> --is-li
 Upon receiving the 'provisioningState': 'Succeeded' json response, enter the following to create your app which will run our API:
 
 ```
-az webapp create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup>
+az webapp create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup> --deployment-container-image-name <yourcontainerregistryinstance>.azurecr.io/go_order_sb
 ```
 
-If you are using the lastest Azure CLI version, you may need to use the following alternative syntax:
+If you are not using the latest Azure CLI version, you may need to use the following alternative syntax:
 
 ```az appservice web create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup>```
 
