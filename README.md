@@ -425,9 +425,16 @@ spec:
   
   ```
   
+Deploy our container using the following command:
+```
+kubectl create -f ./<your_path>/go_order_sb_aci_node.yaml
+```
 Once deployed you should now see your container instances running, one within your cluster, and one running on the ACI Connector pod, see below:
   
  ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8acipod.png)
 
-You can now test the API
+Click on the ACI Connector pod, mark down the IP address, and navigate to the following URL to test your API:
+```
+http://<your_ACI_Connector_pod_IP_address>:8080/swagger
+```
  
