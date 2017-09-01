@@ -381,7 +381,7 @@ Edit the [aci_connector_go_order_sb.yaml](https://github.com/shanepeckham/Contai
 * AZURE_SUBSCRIPTION_ID: insert subscriptionId
 
 ```
-$ kubectl create -f examples/aci-connector.yaml 
+$ kubectl create -f ./<your_path>/aci-connector.yaml 
 deployment "aci-connector" created
 
 $ kubectl get nodes -w
