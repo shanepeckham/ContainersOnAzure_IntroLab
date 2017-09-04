@@ -156,7 +156,7 @@ Upon receiving the 'provisioningState': 'Succeeded' json response, enter the fol
 az webapp create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup>
 ```
 
-Upon receiving the successul completion json response, we will now associate our container from our private Azure Registry to the App Service App, type the following:
+Upon receiving the successful completion json response, we will now associate our container from our private Azure Registry to the App Service App, type the following:
 
 ```
 az webapp config container set -n <your unique web app name> -g <yourresourcegroup>
@@ -184,7 +184,7 @@ See below:
 
 Now we will deploy our container to [Azure Container Instances](https://azure.microsoft.com/en-us/services/container-instances/). 
 
-In the command terminal, login using the AZ CLI and we will start off by created a new resourcegroup for our Container instance. At the time of writing this functionality is still in preview and is thus not available in all regions (it is currently available in westeurope, eastus, westus), hence why we will create a new resourcegroup just in case. 
+In the command terminal, login using the AZ CLI and we will start off by creating a new resource group for our Container instance. At the time of writing this functionality is still in preview and is thus not available in all regions (it is currently available in westeurope, eastus, westus), hence why we will create a new resource group just in case. 
 
 Enter the following:
 
@@ -194,46 +194,19 @@ az group create --name <yourACIresourcegroup> --location <westeurope, eastus, we
 
 ### Associate the environment variables with Azure Container Instance
 
-We will now deploy our container instance via an ARM template, which is [here](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/azuredeploy.json) but before we do, we need to edit this document to ensure we set our environment variables.
-
-
-In the document, the following section needs to be amended, adding your environment keys like you did before:
+We will now deploy our image to an Azure Container Instance.  As before 
 
 ```
-
-"properties": {
-                "containers": [
-                    {
-                        "name": "[variables('container1name')]",
-                        "properties": {
-                            "image": "[variables('container1image')]",
-                            "environmentVariables": [
-                                {
-                                    "name": "DATABASE",
-                                    "value": "<your cosmodb username from step 1>"
-                                },
-                                {
-                                    "name": "PASSWORD",
-                                    "value": "<your cosmodb password from step 1>"
-                                },
-                                {
-                                    "name": "INSIGHTSKEY",
-                                    "value": "<you app insights key from step 2>"
-                                },
-                                {
-                                    "name": "SOURCE",
-                                    "value": "ACI"
-                                }
-                            ],
-
-```
-Once this document is saved, we can create the deployment via the az CLI. Enter the following:
-
-```
-az group deployment create --name <yourACIname> --resource-group <yourACIresourcegroup> --template-file /<path to your file>/azuredeploy.json
+az container create -n go-order-sb -g <yourACIresourcegroup> -e DATABASE=<your cosmodb username from step 1> PASSWORD=<your cosmodb password from step 1> INSIGHTSKEY=<your app insights key from step 2> SOURCE="ACI"--image <yourcontainerregistryinstance>.azurecr.io/go_order_sb:latest --registry-password <your acr admin password>
 ```
 
-Once this has succeeded, you will see your external IP address within the response json, copy this value and navigate to http://yourACIExternalIP:8080/swagger and test your API like before.
+You can check the status of the deployment by issuing the container list command:
+
+```
+az container show -n go-order-sb -g <yourACIresourcegroup> -o table
+```
+
+Once the container has moved to "Succeeded" state you will see your external IP address under the "IP:ports" column, copy this value and navigate to http://yourACIExternalIP:8080/swagger and test your API like before.
 
 ## 8. Deploy the container to an Azure Container Engine provisioned Kubernetes cluster
 
@@ -251,6 +224,12 @@ Upon receiving your "provisioningState": "Succeeded" json response, enter the fo
 az acs create --orchestrator-type kubernetes --resource-group <yourresourcegroupk8> --name <yourk8cluster> --generate-ssh-keys
 ```
 
+In case you have not already, install the kubernetes client:
+
+```
+sudo az acs kubernetes install-cli
+```
+
 You will now be able to connect to your cluster with the following command:
 
 ```
@@ -263,9 +242,6 @@ And to access your Kubernetes graphical dashboard enter:
 az acs kubernetes browse -g <yourresourcegroupk8> -n <yourk8cluster> 
 ```
 
-Note, it is always a good idea to apply an auto shutdown policy to your VMs to avoid unnecessary costs for a test cluster, you can do this in the portal by navigating to the VMs provisioned within your resource group <yourresourcegroupk8> and navigating to the Auto Shutdown section for each one, see below:
-
-![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/autoshutdown.png)
 
 ### Register our Azure Container Registry within Kubernetes
 
@@ -301,7 +277,7 @@ spec:
         ports:
         - containerPort: 8080
       imagePullSecrets:
-        - name: <yourcontainerregistry>
+        - name: <yourcontainerregistryinstance>
 ```
 
 Once the yaml file has been updated, we can now deploy our container. Within the command line enter the following:
@@ -412,5 +388,28 @@ Once deployed you should now see your container instances running, one within yo
   
  ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8acipod.png)
 
-You can now test the API
- 
+You can now test the API.
+
+
+ ### Deploy Draft to your Kubernetes cluster
+ Firstly, download [Helm](https://github.com/kubernetes/helm/releases/tag/v2.5.1), unpack it and place it within your PATH, or ammend your path environment variable to include the location of the helm binary.
+
+ Initialise the helm configuration with
+
+ ```
+ helm init
+ ```
+
+ Use Helm to search for and install stable/traefik, and ingress controller to enable inbound requests for your builds.
+
+ ```
+ $ helm search traefik
+NAME            VERSION DESCRIPTION
+stable/traefik  1.3.0   A Traefik based Kubernetes ingress controller w...
+
+$ helm install stable/traefik --name ingress
+```
+
+
+
+
