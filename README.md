@@ -158,10 +158,10 @@ az appservice plan create -g <yourresourcegroup> -n <yourappserviceplan> --is-li
 Upon receiving the 'provisioningState': 'Succeeded' json response, enter the following to create your app which will run our API:
 
 ```
-az webapp create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup>
+az webapp create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup> --deployment-container-image-name <yourcontainerregistryinstance>.azurecr.io/go_order_sb
 ```
 
-If you are using the lastest Azure CLI version, you may need to use the following alternative syntax:
+If you are not using the latest Azure CLI version, you may need to use the following alternative syntax:
 
 ```az appservice web create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup>```
 
@@ -358,7 +358,10 @@ Pay-As-You-Go                                    AzureCloud   12345678-9012-3456
 
 Use ``` az ``` to create a Service Principal that can perform operations on your resource group:
 ```
-$ az ad sp create-for-rbac --role=Contributor --scopes /subscriptions/<subscriptionId>/resourceGroups/aci-test
+$ az ad sp create-for-rbac --role=Contributor --scopes /subscriptions/<subscriptionId>/resourceGroups/<yourresourcegroupk8>
+```
+After one or a few attempts, you should see the following json structure being output:
+```
 {
   "appId": "<redacted>",
   "displayName": "azure-cli-2017-07-19-19-13-19",
@@ -378,7 +381,7 @@ Edit the [aci_connector_go_order_sb.yaml](https://github.com/shanepeckham/Contai
 * AZURE_SUBSCRIPTION_ID: insert subscriptionId
 
 ```
-$ kubectl create -f examples/aci-connector.yaml 
+$ kubectl create -f ./<your_path>/aci-connector.yaml 
 deployment "aci-connector" created
 
 $ kubectl get nodes -w
@@ -422,9 +425,16 @@ spec:
   
   ```
   
+Deploy our container using the following command:
+```
+kubectl create -f ./<your_path>/go_order_sb_aci_node.yaml
+```
 Once deployed you should now see your container instances running, one within your cluster, and one running on the ACI Connector pod, see below:
   
  ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8acipod.png)
 
-You can now test the API
+Click on the ACI Connector pod, mark down the IP address, and navigate to the following URL to test your API:
+```
+http://<your_ACI_Connector_pod_IP_address>:8080/swagger
+```
  
