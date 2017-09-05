@@ -166,6 +166,7 @@ If you are not using the latest Azure CLI version, you may need to use the follo
 
 ```az appservice web create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup>```
 
+
 Upon receiving the successful completion json response, we will now associate our container from our private Azure Registry to the App Service App, type the following (if you are using PowerShell on Windows, you may need to remove any line breaks and continue on a single line):
 
 ```
@@ -287,7 +288,9 @@ az acs create --orchestrator-type kubernetes --resource-group <yourresourcegroup
 In case you have not already, install the kubernetes client:
 
 ```
-sudo az acs kubernetes install-cli
+=======
+az acs kubernetes install-cli
+
 ```
 
 You will now be able to connect to your cluster with the following command:
@@ -462,8 +465,6 @@ Click on the ACI Connector pod, mark down the IP address, and navigate to the fo
 ```
 http://<your_ACI_Connector_pod_IP_address>:8080/swagger
 ```
- 
- 
 
  ### Deploy Helm and Draft to your Kubernetes cluster
  Firstly, download [Helm](https://github.com/kubernetes/helm/releases/tag/v2.5.1), unpack it and place it within your PATH, or ammend your path environment variable to include the location of the helm binary.
