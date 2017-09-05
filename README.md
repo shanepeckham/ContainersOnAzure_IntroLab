@@ -22,6 +22,7 @@ For this Lab you will require:
 
 * Install the Azure CLI 2.0, get it here - https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 * Install Docker, get it here - https://docs.docker.com/engine/installation/
+* Install Kubectl, get it here - https://kubernetes.io/docs/tasks/tools/install-kubectl/
 * Install Postman, get it here - https://www.getpostman.com - this is optional but useful
 
 When using the Azure CLI, after logging in, if you have more than one subscripton you may need to set the default subscription you wish to perform actions against. To do this use the following command:
