@@ -189,6 +189,12 @@ The environment keys that need to be set are as follows:
 See below:
 ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/appsettings.png)
 
+Now we can test our app service container, navigate to the Overview section to get the URL for your API, see below:
+
+![alt text](https://github.com/shanepeckham/CADLab_Loyalty/blob/master/Images/App_URI.png)
+
+Ensure you add ```/swagger``` on to the end of the URL to access the Swagger API test harness.
+
 ## 7. Deploy the container to Azure Container Instance
 
 Now we will deploy our container to [Azure Container Instances](https://azure.microsoft.com/en-us/services/container-instances/). 
