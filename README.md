@@ -22,8 +22,14 @@ For this Lab you will require:
 
 * Install the Azure CLI 2.0, get it here - https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 * Install Docker, get it here - https://docs.docker.com/engine/installation/
+* Install Kubectl, get it here - https://kubernetes.io/docs/tasks/tools/install-kubectl/
 * Install Postman, get it here - https://www.getpostman.com - this is optional but useful
 
+When using the Azure CLI, after logging in, if you have more than one subscripton you may need to set the default subscription you wish to perform actions against. To do this use the following command:
+
+```
+az account set --subscription "<your requried subscription guid>"
+```
 
 ## 1. Provisioning a Cosmos DB instance
 
@@ -89,10 +95,10 @@ The environment keys that need to be set are as follows:
 * INSIGHTSKEY: <you app insights key from step 2>
 * SOURCE: This is a free text field which we will use specify where we are running the container from. I use the values localhost, AppService, ACI and K8 for my tests
 
-So to run the container on your local machine, enter the following command, substituting your environment variable values:
+So to run the container on your local machine, enter the following command, substituting your environment variable values (if you are running Docker on Windows, omit the 'sudo'):
 
 ```
-sudo docker run --name go_order_sb -p 8080:8080 -e DATABASE="<your cosmodb username from step 1>" -e PASSWORD="<your cosmodb password from step 1>" -e INSIGHTSKEY="<you app insights key from step 2>" -e SOURCE="localhost"  --rm -i -t shanepeckham/go_order_sb
+sudo docker run --name go_order_sb -p 8080:8080 -e DATABASE="<your cosmodb username from step 1>" -e PASSWORD="<your cosmodb password from step 1>" -e INSIGHTSKEY="<you app insights key from step 2>" -e SOURCE="localhost"  --rm -i -t shanepeckham/go_order_sb
 ```
 Note, the application runs on port 8080 which we will bind to the host as well. If you are running on Windows, select 'Allow Access' on Windows Firewall.
 
@@ -153,10 +159,14 @@ az appservice plan create -g <yourresourcegroup> -n <yourappserviceplan> --is-li
 Upon receiving the 'provisioningState': 'Succeeded' json response, enter the following to create your app which will run our API:
 
 ```
-az webapp create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup>
+az webapp create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup> --deployment-container-image-name <yourcontainerregistryinstance>.azurecr.io/go_order_sb
 ```
 
-Upon receiving the successful completion json response, we will now associate our container from our private Azure Registry to the App Service App, type the following:
+If you are not using the latest Azure CLI version, you may need to use the following alternative syntax:
+
+```az appservice web create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup>```
+
+Upon receiving the successful completion json response, we will now associate our container from our private Azure Registry to the App Service App, type the following (if you are using PowerShell on Windows, you may need to remove any line breaks and continue on a single line):
 
 ```
 az webapp config container set -n <your unique web app name> -g <yourresourcegroup>
@@ -175,16 +185,26 @@ The environment keys that need to be set are as follows:
 * PASSWORD: <your cosmodb password from step 1>
 * INSIGHTSKEY: <you app insights key from step 2>
 * SOURCE: This is a free text field which we will use specify where we are running the container from. I use the values localhost, AppService, ACI and K8 for my tests
-* PORT: 8080 
+* WEBSITES_PORT: 8080 
 
 See below:
-![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/appsettings.png)
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/AppSettingsWeb.png)
+
+Now we can test our app service container, navigate to the Overview section to get the URL for your API, see below:
+
+![alt text](https://github.com/shanepeckham/CADLab_Loyalty/blob/master/Images/App_URI.png)
+
+Ensure you add ```/swagger``` on to the end of the URL to access the Swagger API test harness.
+
+### Stream the logs from the App Service container
+
+To see the log stream of your container running in the web app, navigate to: ```https://<yourwebsitename>.scm.azurewebsites.net/api/logstream```
 
 ## 7. Deploy the container to Azure Container Instance
 
 Now we will deploy our container to [Azure Container Instances](https://azure.microsoft.com/en-us/services/container-instances/). 
 
-In the command terminal, login using the AZ CLI and we will start off by creating a new resource group for our Container instance. At the time of writing this functionality is still in preview and is thus not available in all regions (it is currently available in westeurope, eastus, westus), hence why we will create a new resource group just in case. 
+In the command terminal, login using the AZ CLI and we will start off by creating a new resource group for our Container instance. At the time of writing this functionality is still in preview and is thus not available in all regions (it is currently available in westeurope, eastus, westus), hence why we will create a new resource group just in case.
 
 Enter the following:
 
@@ -194,7 +214,48 @@ az group create --name <yourACIresourcegroup> --location <westeurope, eastus, we
 
 ### Associate the environment variables with Azure Container Instance
 
-We will now deploy our image to an Azure Container Instance.  As before 
+We will now deploy our container instance via an ARM template, which is [here](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/azuredeploy.json) but before we do, we need to edit this document to ensure we set our environment variables.
+
+
+In the document, the following section needs to be amended, adding your environment keys like you did before:
+
+```
+
+"properties": {
+                "containers": [
+                    {
+                        "name": "[variables('container1name')]",
+                        "properties": {
+                            "image": "[variables('container1image')]",
+                            "environmentVariables": [
+                                {
+                                    "name": "DATABASE",
+                                    "value": "<your cosmodb username from step 1>"
+                                },
+                                {
+                                    "name": "PASSWORD",
+                                    "value": "<your cosmodb password from step 1>"
+                                },
+                                {
+                                    "name": "INSIGHTSKEY",
+                                    "value": "<you app insights key from step 2>"
+                                },
+                                {
+                                    "name": "SOURCE",
+                                    "value": "ACI"
+                                }
+                            ],
+
+```
+
+
+Once this document is saved, we can create the deployment via the az CLI. Enter the following:
+
+```
+az group deployment create --name <yourACIname> --resource-group <yourACIresourcegroup> --template-file /<path to your file>/azuredeploy.json
+```
+
+It is also possible to create the container instance via the Azure CLI directly.
 
 ```
 az container create -n go-order-sb -g <yourACIresourcegroup> -e DATABASE=<your cosmodb username from step 1> PASSWORD=<your cosmodb password from step 1> INSIGHTSKEY=<your app insights key from step 2> SOURCE="ACI"--image <yourcontainerregistryinstance>.azurecr.io/go_order_sb:latest --registry-password <your acr admin password>
@@ -223,7 +284,6 @@ Upon receiving your "provisioningState": "Succeeded" json response, enter the fo
 ```
 az acs create --orchestrator-type kubernetes --resource-group <yourresourcegroupk8> --name <yourk8cluster> --generate-ssh-keys
 ```
-
 In case you have not already, install the kubernetes client:
 
 ```
@@ -242,13 +302,16 @@ And to access your Kubernetes graphical dashboard enter:
 az acs kubernetes browse -g <yourresourcegroupk8> -n <yourk8cluster> 
 ```
 
+Note, it is always a good idea to apply an auto shutdown policy to your VMs to avoid unnecessary costs for a test cluster, you can do this in the portal by navigating to the VMs provisioned within your resource group <yourresourcegroupk8> and navigating to the Auto Shutdown section for each one, see below:
+
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/autoshutdown.png)
 
 ### Register our Azure Container Registry within Kubernetes
 
 We now want to register our private Azure Container Registry with our Kubernetes cluster to ensure that we can pull images from it. Enter the following within your command window:
 
 ```
-kubectl create secret docker-registry <yourcontainerregistryinstance> --docker-server=<yourcontainerregistryinstance>.azurecr.io --docker-username=<your acr admin username> --docker-password=<your acr admin password> --docker-email=shanepeckham@live.com
+kubectl create secret docker-registry <yourcontainerregistryinstance> --docker-server=<yourcontainerregistryinstance>.azurecr.io --docker-username=<your acr admin username> --docker-password=<your acr admin password> --docker-email=<youremailaddress.com>
 ```
 
 In the Kubernetes dashboard you should now see this created within the secrets section:
@@ -277,7 +340,7 @@ spec:
         ports:
         - containerPort: 8080
       imagePullSecrets:
-        - name: <yourcontainerregistryinstance>
+        - name: <yourcontainerregistry>
 ```
 
 Once the yaml file has been updated, we can now deploy our container. Within the command line enter the following:
@@ -320,7 +383,10 @@ Pay-As-You-Go                                    AzureCloud   12345678-9012-3456
 
 Use ``` az ``` to create a Service Principal that can perform operations on your resource group:
 ```
-$ az ad sp create-for-rbac --role=Contributor --scopes /subscriptions/<subscriptionId>/resourceGroups/<yourACIresourcegroup>
+$ az ad sp create-for-rbac --role=Contributor --scopes /subscriptions/<subscriptionId>/resourceGroups/<yourresourcegroupk8>
+```
+After one or a few attempts, you should see the following json structure being output:
+```
 {
   "appId": "<redacted>",
   "displayName": "azure-cli-2017-07-19-19-13-19",
@@ -340,7 +406,7 @@ Edit the [aci_connector_go_order_sb.yaml](https://github.com/shanepeckham/Contai
 * AZURE_SUBSCRIPTION_ID: insert subscriptionId
 
 ```
-$ kubectl create -f examples/aci-connector.yaml 
+$ kubectl create -f ./<your_path>/aci-connector.yaml 
 deployment "aci-connector" created
 
 $ kubectl get nodes -w
@@ -383,19 +449,23 @@ spec:
   nodeName: aci-connector
   
   ```
-
+  
+Deploy our container using the following command:
 ```
-$ kubectl create -f examples/goordersb.yaml 
+kubectl create -f ./<your_path>/go_order_sb_aci_node.yaml
 ```
-
 Once deployed you should now see your container instances running, one within your cluster, and one running on the ACI Connector pod, see below:
   
  ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8acipod.png)
 
-You can now test the API.
+Click on the ACI Connector pod, mark down the IP address, and navigate to the following URL to test your API:
+```
+http://<your_ACI_Connector_pod_IP_address>:8080/swagger
+```
+ 
+ 
 
-
- ### Deploy Draft to your Kubernetes cluster
+ ### Deploy Helm and Draft to your Kubernetes cluster
  Firstly, download [Helm](https://github.com/kubernetes/helm/releases/tag/v2.5.1), unpack it and place it within your PATH, or ammend your path environment variable to include the location of the helm binary.
 
  Initialise the helm configuration with
