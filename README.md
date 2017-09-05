@@ -320,7 +320,7 @@ Pay-As-You-Go                                    AzureCloud   12345678-9012-3456
 
 Use ``` az ``` to create a Service Principal that can perform operations on your resource group:
 ```
-$ az ad sp create-for-rbac --role=Contributor --scopes /subscriptions/<subscriptionId>/resourceGroups/aci-test
+$ az ad sp create-for-rbac --role=Contributor --scopes /subscriptions/<subscriptionId>/resourceGroups/<yourACIresourcegroup>
 {
   "appId": "<redacted>",
   "displayName": "azure-cli-2017-07-19-19-13-19",
@@ -383,7 +383,11 @@ spec:
   nodeName: aci-connector
   
   ```
-  
+
+```
+$ kubectl create -f examples/goordersb.yaml 
+```
+
 Once deployed you should now see your container instances running, one within your cluster, and one running on the ACI Connector pod, see below:
   
  ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/K8acipod.png)
@@ -410,6 +414,75 @@ stable/traefik  1.3.0   A Traefik based Kubernetes ingress controller w...
 $ helm install stable/traefik --name ingress
 ```
 
+Once the ingress controller has been deployed, check the IP address that has been allocated within the Pod:
 
+```
+kubectl get svc -w
+NAME              CLUSTER-IP   EXTERNAL-IP     PORT(S)                      AGE
+ingress-traefik   10.0.98.22   23.101.66.197   80:31765/TCP,443:31391/TCP   10h
+kubernetes        10.0.0.1     <none>          443/TCP                      13h
+```
 
+Usually, it would be down to the owner of the Kubernetes and Helm installation to ammend their DNS zone to allow applications to be published in a catchall domain.
+
+For the purpose of this workshop, let the moderator know the IP address of your ingress controller, and they will create the associated A record
+
+```
+az network dns record-set a add-record --ipv4-address 23.101.66.197 --record-set-name 'apps' -g inklin -z inkl.in
+```
+
+Once DNS record has been created for the ingress controller, you will then need to install [Draft](https://azuredraft.blob.core.windows.net/draft/draft-canary-linux-amd64.tar.gz) and initialise the Draft environment
+
+```
+helm init
+Creating /home/justin/.draft
+Creating /home/justin/.draft/plugins
+Creating /home/justin/.draft/packs
+Creating pack python...
+Creating pack php...
+Creating pack ruby...
+Creating pack csharp...
+Creating pack gradle...
+Creating pack javascript...
+Creating pack maven pom...
+Creating pack go...
+$DRAFT_HOME has been configured at /home/justin/.draft.
+
+In order to install Draft, we need a bit more information...
+
+1. Enter your Docker registry URL (e.g. docker.io/myuser, quay.io/myuser, myregistry.azurecr.io): inklin.azurecr.io
+2. Enter your username: inklin
+3. Enter your password: 
+4. Enter your top-level domain for ingress (e.g. draft.example.com): apps.inkl.in
+Draft has been installed into your Kubernetes Cluster.
+Happy Sailing!
+```
+
+Now that Draft has been initialised, you are ready to start working on your first app.
+
+The Azure Draft team has published a number of example bootstraps for popular languages [here](https://github.com/Azure/draft/tree/master/examples).  Download the language example you wish to use, and then initialise the Draft environment to continue working.
+
+```
+draft create
+--> Draft detected the primary language as Python with 96.875000% certainty.
+--> Ready to sail
+```
+
+You are now ready to Draft Up your environment to the Kubernetes cluster.
+
+```
+draft up
+Draft Up Started: 'eponymous-lion'
+eponymous-lion: Building Docker Image: SUCCESS ⚓  (1.0004s)
+eponymous-lion: Pushing Docker Image: SUCCESS ⚓  (43.0938s)
+eponymous-lion: Releasing Application: SUCCESS ⚓  (6.1915s)
+eponymous-lion: Build ID: 01BS8WEYATJRXWR24SF5608TY0
+Releasing Application: started
+Releasing Application: Upgrading eponymous-lion.
+Releasing Application: eponymous-lion DEPLOYED
+Releasing Application: notes:
+  http://eponymous-lion.apps.inkl.in to access your application
+
+Releasing Application: success
+```
 
