@@ -98,7 +98,7 @@ The environment keys that need to be set are as follows:
 So to run the container on your local machine, enter the following command, substituting your environment variable values (if you are running Docker on Windows, omit the 'sudo'):
 
 ```
-sudo docker run --name go_order_sb -p 8080:8080 -e DATABASE="<your cosmodb username from step 1>" -e PASSWORD="<your cosmodb password from step 1>" -e INSIGHTSKEY="<you app insights key from step 2>" -e SOURCE="localhost"  --rm -i -t shanepeckham/go_order_sb
+sudo docker run --name go_order_sb -p 8080:8080 -e DATABASE="<your cosmodb username from step 1>" -e PASSWORD="<your cosmodb password from step 1>" -e INSIGHTSKEY="<you app insights key from step 2>" -e SOURCE="localhost"  --rm -i -t shanepeckham/go_order_sb
 ```
 Note, the application runs on port 8080 which we will bind to the host as well. If you are running on Windows, select 'Allow Access' on Windows Firewall.
 
@@ -166,7 +166,8 @@ If you are not using the latest Azure CLI version, you may need to use the follo
 
 ```az appservice web create -n <your unique web app name> -p <yourappserviceplan> -g <yourresourcegroup>```
 
-Upon receiving the successul completion json response, we will now associate our container from our private Azure Registry to the App Service App, type the following (if you are using PowerShell on Windows, you may need to remove any line breaks and continue on a single line):
+
+Upon receiving the successful completion json response, we will now associate our container from our private Azure Registry to the App Service App, type the following (if you are using PowerShell on Windows, you may need to remove any line breaks and continue on a single line):
 
 ```
 az webapp config container set -n <your unique web app name> -g <yourresourcegroup>
@@ -204,7 +205,7 @@ To see the log stream of your container running in the web app, navigate to: ```
 
 Now we will deploy our container to [Azure Container Instances](https://azure.microsoft.com/en-us/services/container-instances/). 
 
-In the command terminal, login using the AZ CLI and we will start off by created a new resourcegroup for our Container instance. At the time of writing this functionality is still in preview and is thus not available in all regions (it is currently available in westeurope, eastus, westus), hence why we will create a new resourcegroup just in case. 
+In the command terminal, login using the AZ CLI and we will start off by creating a new resource group for our Container instance. At the time of writing this functionality is still in preview and is thus not available in all regions (it is currently available in westeurope, eastus, westus), hence why we will create a new resource group just in case.
 
 Enter the following:
 
@@ -247,13 +248,27 @@ In the document, the following section needs to be amended, adding your environm
                             ],
 
 ```
+
+
 Once this document is saved, we can create the deployment via the az CLI. Enter the following:
 
 ```
 az group deployment create --name <yourACIname> --resource-group <yourACIresourcegroup> --template-file /<path to your file>/azuredeploy.json
 ```
 
-Once this has succeeded, you will see your external IP address within the response json, copy this value and navigate to http://yourACIExternalIP:8080/swagger and test your API like before.
+It is also possible to create the container instance via the Azure CLI directly.
+
+```
+az container create -n go-order-sb -g <yourACIresourcegroup> -e DATABASE=<your cosmodb username from step 1> PASSWORD=<your cosmodb password from step 1> INSIGHTSKEY=<your app insights key from step 2> SOURCE="ACI"--image <yourcontainerregistryinstance>.azurecr.io/go_order_sb:latest --registry-password <your acr admin password>
+```
+
+You can check the status of the deployment by issuing the container list command:
+
+```
+az container show -n go-order-sb -g <yourACIresourcegroup> -o table
+```
+
+Once the container has moved to "Succeeded" state you will see your external IP address under the "IP:ports" column, copy this value and navigate to http://yourACIExternalIP:8080/swagger and test your API like before.
 
 ## 8. Deploy the container to an Azure Container Engine provisioned Kubernetes cluster
 
@@ -273,7 +288,9 @@ az acs create --orchestrator-type kubernetes --resource-group <yourresourcegroup
 In case you have not already, install the kubernetes client:
 
 ```
+=======
 az acs kubernetes install-cli
+
 ```
 
 You will now be able to connect to your cluster with the following command:
@@ -448,4 +465,96 @@ Click on the ACI Connector pod, mark down the IP address, and navigate to the fo
 ```
 http://<your_ACI_Connector_pod_IP_address>:8080/swagger
 ```
- 
+
+ ### Deploy Helm and Draft to your Kubernetes cluster
+ Firstly, download [Helm](https://github.com/kubernetes/helm/releases/tag/v2.5.1), unpack it and place it within your PATH, or ammend your path environment variable to include the location of the helm binary.
+
+ Initialise the helm configuration with
+
+ ```
+ helm init
+ ```
+
+ Use Helm to search for and install stable/traefik, and ingress controller to enable inbound requests for your builds.
+
+ ```
+ $ helm search traefik
+NAME            VERSION DESCRIPTION
+stable/traefik  1.3.0   A Traefik based Kubernetes ingress controller w...
+
+$ helm install stable/traefik --name ingress
+```
+
+Once the ingress controller has been deployed, check the IP address that has been allocated within the Pod:
+
+```
+kubectl get svc -w
+NAME              CLUSTER-IP   EXTERNAL-IP     PORT(S)                      AGE
+ingress-traefik   10.0.98.22   23.101.66.197   80:31765/TCP,443:31391/TCP   10h
+kubernetes        10.0.0.1     <none>          443/TCP                      13h
+```
+
+Usually, it would be down to the owner of the Kubernetes and Helm installation to ammend their DNS zone to allow applications to be published in a catchall domain.
+
+For the purpose of this workshop, let the moderator know the IP address of your ingress controller, and they will create the associated A record
+
+```
+az network dns record-set a add-record --ipv4-address 23.101.66.197 --record-set-name 'apps' -g inklin -z inkl.in
+```
+
+Once DNS record has been created for the ingress controller, you will then need to install [Draft](https://azuredraft.blob.core.windows.net/draft/draft-canary-linux-amd64.tar.gz) and initialise the Draft environment
+
+```
+helm init
+Creating /home/justin/.draft
+Creating /home/justin/.draft/plugins
+Creating /home/justin/.draft/packs
+Creating pack python...
+Creating pack php...
+Creating pack ruby...
+Creating pack csharp...
+Creating pack gradle...
+Creating pack javascript...
+Creating pack maven pom...
+Creating pack go...
+$DRAFT_HOME has been configured at /home/justin/.draft.
+
+In order to install Draft, we need a bit more information...
+
+1. Enter your Docker registry URL (e.g. docker.io/myuser, quay.io/myuser, myregistry.azurecr.io): inklin.azurecr.io
+2. Enter your username: inklin
+3. Enter your password: 
+4. Enter your top-level domain for ingress (e.g. draft.example.com): apps.inkl.in
+Draft has been installed into your Kubernetes Cluster.
+Happy Sailing!
+```
+
+Now that Draft has been initialised, you are ready to start working on your first app.
+
+The Azure Draft team has published a number of example bootstraps for popular languages [here](https://github.com/Azure/draft/tree/master/examples).  Download the language example you wish to use, and then initialise the Draft environment to continue working.
+
+```
+draft create
+--> Draft detected the primary language as Python with 96.875000% certainty.
+--> Ready to sail
+```
+
+You are now ready to Draft Up your environment to the Kubernetes cluster.
+
+```
+draft up
+Draft Up Started: 'eponymous-lion'
+eponymous-lion: Building Docker Image: SUCCESS ⚓  (1.0004s)
+eponymous-lion: Pushing Docker Image: SUCCESS ⚓  (43.0938s)
+eponymous-lion: Releasing Application: SUCCESS ⚓  (6.1915s)
+eponymous-lion: Build ID: 01BS8WEYATJRXWR24SF5608TY0
+Releasing Application: started
+Releasing Application: Upgrading eponymous-lion.
+Releasing Application: eponymous-lion DEPLOYED
+Releasing Application: notes:
+  http://eponymous-lion.apps.inkl.in to access your application
+
+Releasing Application: success
+```
+
+Any changes the (in this Python example) to the app.py file will trigger another build and deployment to the Kubernetes environment.
