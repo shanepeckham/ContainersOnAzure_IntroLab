@@ -486,3 +486,4 @@ Releasing Application: notes:
 Releasing Application: success
 ```
 
+Any changes the (in this Python example) to the app.py file will trigger another build and deployment to the Kubernetes environment.
