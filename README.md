@@ -185,7 +185,7 @@ The environment keys that need to be set are as follows:
 * PASSWORD: <your cosmodb password from step 1>
 * INSIGHTSKEY: <you app insights key from step 2>
 * SOURCE: This is a free text field which we will use specify where we are running the container from. I use the values localhost, AppService, ACI and K8 for my tests
-* PORT: 8080 
+* WEBSITES_PORT: 8080 
 
 See below:
 ![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/appsettings.png)
