@@ -286,7 +286,7 @@ Note, it is always a good idea to apply an auto shutdown policy to your VMs to a
 We now want to register our private Azure Container Registry with our Kubernetes cluster to ensure that we can pull images from it. Enter the following within your command window:
 
 ```
-kubectl create secret docker-registry <yourcontainerregistryinstance> --docker-server=<yourcontainerregistryinstance>.azurecr.io --docker-username=<your acr admin username> --docker-password=<your acr admin password> --docker-email=shanepeckham@live.com
+kubectl create secret docker-registry <yourcontainerregistryinstance> --docker-server=<yourcontainerregistryinstance>.azurecr.io --docker-username=<your acr admin username> --docker-password=<your acr admin password> --docker-email=<youremailaddress.com>
 ```
 
 In the Kubernetes dashboard you should now see this created within the secrets section:
