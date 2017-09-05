@@ -196,6 +196,10 @@ Now we can test our app service container, navigate to the Overview section to g
 
 Ensure you add ```/swagger``` on to the end of the URL to access the Swagger API test harness.
 
+### Stream the logs from the App Service container
+
+To see the log stream of your container running in the web app, navigate to: ```https://<yourwebsitename>.scm.azurewebsites.net/api/logstream```
+
 ## 7. Deploy the container to Azure Container Instance
 
 Now we will deploy our container to [Azure Container Instances](https://azure.microsoft.com/en-us/services/container-instances/). 
