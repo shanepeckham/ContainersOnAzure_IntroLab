@@ -188,7 +188,7 @@ The environment keys that need to be set are as follows:
 * WEBSITES_PORT: 8080 
 
 See below:
-![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/appsettings.png)
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/AppSettingsWeb.png)
 
 Now we can test our app service container, navigate to the Overview section to get the URL for your API, see below:
 
