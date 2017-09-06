@@ -560,7 +560,7 @@ Releasing Application: success
 
 Any changes the (in this Python example) to the app.py file will trigger another build and deployment to the Kubernetes environment.
 
-### View container telemtry in Application Insights
+### View container telemetry in Application Insights
 
 The container we have deployed writes simple events to Application Insights with a time stamp but we could write much richer metrics. Application Insights provides a number of prebuilt dashboards to view application statistics alongside a query tool for getting deep custom insights. For the purposes of this intro we will simply expose the custom events we have tracked, namely the commit to the Azure CosmosDB.
 
