@@ -559,3 +559,23 @@ Releasing Application: success
 ```
 
 Any changes the (in this Python example) to the app.py file will trigger another build and deployment to the Kubernetes environment.
+
+### View container telemtry in Application Insights
+
+The container we have deployed writes simple events to Application Insights with a time stamp but we could write much richer metrics. Application Insights provides a number of prebuilt dashboards to view application statistics alongside a query tool for getting deep custom insights. For the purposes of this intro we will simply expose the custom events we have tracked, namely the commit to the Azure CosmosDB.
+
+In portal navigate to the Application Insights instance you provisioned and 'Metrics Explorer', see below:
+
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/MetricsExplorer.png)
+ 
+Click edit on one of the charts, select a TimeRange and set the Filters to 'Custom Event'. This will retrieve all of the writes to CosmosDB, see below:
+
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/Filter.png)
+
+Now we can Search the events by the source, for example 'K8' to retrieve only Kubernetes cluster writes, see below:
+
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/Search.png)
+
+Finally, for more powerful queries, select the 'Analytics' button, see below:
+
+![alt text](https://github.com/shanepeckham/ContainersOnAzure_MiniLab/blob/master/images/Analytics.png)
