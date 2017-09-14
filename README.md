@@ -271,7 +271,7 @@ az container show -n go-order-sb -g <yourACIresourcegroup> -o table
 
 Once the container has moved to "Succeeded" state you will see your external IP address under the "IP:ports" column, copy this value and navigate to http://yourACIExternalIP:8080/swagger and test your API like before.
 
-## 8. Deploy the container to an Azure Container Engine provisioned Kubernetes cluster
+## 8. Deploy the container to an Azure Container Instance provisioned Kubernetes cluster
 
 Here we will deploy a Kubernetes cluster quickly using the [Azure Container Engine](https://azure.microsoft.com/en-us/services/container-service/). Note, the approach below will control all aspects of your Kubernetes setup and is intended for quick provisioning, for more control on the implementation look at the [following](https://github.com/Azure/acs-engine/blob/master/docs/acsengine.md). 
 
